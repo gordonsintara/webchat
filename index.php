@@ -1,30 +1,8 @@
 <?php
     session_start();
-     
-    if(isset($_POST['enter'])){
-        if($_POST['name'] != ""){
-            $_SESSION['name'] = stripslashes(htmlspecialchars($_POST['name']));
-        }
-        else{
-            echo '<span class="error">Please type in a name</span>';
-        }
-    }
+    require_once "php/main.php";
+?>
 
-    function loginForm(){
-        echo'
-        <div id="loginform">
-          <p>Please enter your name to continue!</p>
-          <form action="index.php" method="post">
-            <label for="name">Name &mdash;</label>
-            <input type="text" name="name" id="name" />
-            <input type="submit" name="enter" id="enter" value="Enter" />
-          </form>
-        </div>
-        ';
-    }
-
-
-    ?>
 
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -38,7 +16,7 @@
         <title></title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="">
+        <link rel="stylesheet" href="main.css">
     </head>
     <body>
 <?php
@@ -52,7 +30,7 @@
         <div id = "wrapper">
             <div id = "menu">
                 <p class = "welcome"> Welcome <?php echo $_SESSION["name"];?></p>
-                <p class = "logout"><a id = "exit" href="#">Leave</a></p>
+ 
 
                     <?php  if(isset($_GET['logout'])){ 
                         
@@ -61,7 +39,7 @@
                         file_put_contents("log.html", $logout_message, FILE_APPEND | LOCK_EX);
                         
                         session_destroy();
-                        header("Location: index.php"); //Redirect the user
+                        header("Location: index.php"); 
                     }
                     ?>
             </div>
@@ -80,6 +58,8 @@
                 <input type = "submit" id = "submitmsg" name = "submitmsg" value = "Send">
             
                 </form>
+                <div id = "menu">
+                <p class = "logout"><a id = "exit" href="#">Leave</a></p>
         </div>
 
 
@@ -89,14 +69,38 @@
         <script type="text/javascript">
             // jQuery Document
             $(document).ready(function () {
+                function loadLog(){     
+                    var oldscrollHeight = $("#chatbox")[0].scrollHeight - 20; //Scroll height before the request
+                        $.ajax({
+                          url: "log.html",
+                          cache: false,
+                          success: function(html){        
+                           $("#chatbox").html(html); //Insert chat log into the #chatbox div   
+             
+                                //Auto-scroll           
+                                var newscrollHeight = $("#chatbox")[0].scrollHeight - 20; //Scroll height after the request
+                                if(newscrollHeight > oldscrollHeight){
+                                    $("#chatbox").animate({ scrollTop: newscrollHeight }, 'normal'); //Autoscroll to bottom of div
+            }               
+        },
+    });
+}
                 //user ends session
                 $("#exit").click(function(){
                     var exit = confirm("are you sure you want to  leave ");
                     if(exit==true){window.location = 'index.php?logout=true';}
                 });
 
+                //If user submits the form
+                $("#submitmsg").click(function () {
+                    var clientmsg = $("#usermsg").val();
+                    $.post("post.php", { text: clientmsg });
+                    $("#usermsg").val("");
+                    return false;
+                });
 
 
+setInterval (loadLog, 2500);
             });
         </script>
 
