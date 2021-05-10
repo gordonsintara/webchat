@@ -41,10 +41,67 @@
         <link rel="stylesheet" href="">
     </head>
     <body>
-
-
-
+<?php
+  if(!isset($_SESSION['name'])){
+     loginForm();
+     }else{
         
+?>
+        
+
+        <div id = "wrapper">
+            <div id = "menu">
+                <p class = "welcome"> Welcome <?php echo $_SESSION["name"];?></p>
+                <p class = "logout"><a id = "exit" href="#">Leave</a></p>
+
+                    <?php  if(isset($_GET['logout'])){ 
+                        
+                        //Simple exit message
+                        $logout_message = "<div class='msgln'><span class='left-info'>User <b class='user-name-left'>". $_SESSION['name'] ."</b> has left the chat session.</span><br></div>";
+                        file_put_contents("log.html", $logout_message, FILE_APPEND | LOCK_EX);
+                        
+                        session_destroy();
+                        header("Location: index.php"); //Redirect the user
+                    }
+                    ?>
+            </div>
+
+            <div id = "chatbox"></div>
+                <?php
+                    if(file_exists("log.html")&& filesize("log.html") > 0 ){
+                        $contents = file_get_contents("log.html");
+                        echo $contents;
+                
+                    }
+                ?>
+
+                <form name = "Messages" action="">
+                <input type = "text" id = "usermsg" name = "usermsg" >
+                <input type = "submit" id = "submitmsg" name = "submitmsg" value = "Send">
+            
+                </form>
+        </div>
+
+
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="" async defer></script>
-    </body>
+        <script type="text/javascript">
+            // jQuery Document
+            $(document).ready(function () {
+                //user ends session
+                $("#exit").click(function(){
+                    var exit = confirm("are you sure you want to  leave ");
+                    if(exit==true){window.location = 'index.php?logout=true';}
+                });
+
+
+
+            });
+        </script>
+
+        </body>
+
+
+
 </html>
